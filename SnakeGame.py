@@ -8,8 +8,8 @@ import os
 pygame.init()
 
 # Display window
-TILE_SIZE = 35  # Larger size
-COLS, ROWS = 20, 20
+TILE_SIZE = 60  # Larger size
+COLS, ROWS = 10, 10
 WIDTH, HEIGHT = TILE_SIZE * COLS, TILE_SIZE * ROWS
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Bocchi's Snake Game") # title window
@@ -17,8 +17,13 @@ pygame.display.set_caption("Bocchi's Snake Game") # title window
 # Colours
 BG_COLOUR_1 = ("#63955B")
 BG_COLOUR_2 = ("#99C06D")
-RED = ("#ff3232")
+RED = ("#8B0000") # not to get confused with the skin
 BLACK = ("#000000")
+DARK_GREEN = ("#006400")
+BOCCHI_PINK = ("#e8a7a1")
+BOCCHI_YELLOW = ("#ffff3d")
+BOCCHI_BLUE = ("#7db0a7")
+MY_PFP_COLOUR = ("#7E93AE")
 
 # randomize whenever you play
 # very customizable change if you want
@@ -47,7 +52,7 @@ big_font = pygame.font.SysFont("Consolas", 60)
 clock = pygame.time.Clock()
 
 # High Score // sets your personal highscore through a save json file
-high_score_file = "SnakeHighscore.json" # automatically creates it // my personal best Score: 50
+high_score_file = "SnakeHighscore.json" # automatically creates it // my personal best Score: 20
 if not os.path.exists(high_score_file):
     with open(high_score_file, "w") as f:
         f.write("0")
@@ -93,10 +98,14 @@ def show_menu(): # start menu // waits for the player to press "ENTER"
     # Waits for the player to press Enter
     in_menu = True
     while in_menu:
-        screen.fill(BG_COLOUR_1)
+        screen.fill(BOCCHI_PINK)
         screen_text("SNAKE GAME", big_font, BLACK, WIDTH//2, HEIGHT//3, center=True)
         screen_text("Press ENTER to Play", font, BLACK, WIDTH//2, HEIGHT//2, center=True)
-        screen_text("WASD Controls", font, BLACK, WIDTH//2, HEIGHT//2 + 40, center=True)
+        screen_text("Inspired by Bro Code", font, DARK_GREEN, WIDTH//2, HEIGHT//2.5, center=True)
+        screen_text("WASD Controls", font, RED, WIDTH//2, HEIGHT//2 + 40, center=True)
+        screen_text("Made by _Bunccep", font, MY_PFP_COLOUR, WIDTH//2, HEIGHT//2 + 70, center=True)
+        screen_text("---->", big_font, BOCCHI_YELLOW, WIDTH//2, HEIGHT//2 + 120, center=True)
+        screen_text("<----", big_font, BOCCHI_BLUE, WIDTH//2, HEIGHT//2 + 160, center=True)
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -109,11 +118,12 @@ def game_over_screen(score, personal_best): # game over when hits collision of y
     gameover_sound.play()
     pygame.mixer.music.stop()
     screen.fill(BG_COLOUR_2)
-    screen_text("Game Over!", big_font, RED, WIDTH//2, HEIGHT//3, center=True)
-    screen_text(f"Score: {score}", font, BLACK, WIDTH//2, HEIGHT//2, center=True)
-    screen_text(f"Best: {personal_best}", font, BLACK, WIDTH//2, HEIGHT//2 + 30, center=True)
+    screen_text("Game Over!(-_-)", big_font, RED, WIDTH//2, HEIGHT//3, center=True)
+    screen_text(f"Score: {score}", font, BOCCHI_YELLOW, WIDTH//2, HEIGHT//2, center=True)
+    screen_text(f"Best: {personal_best}", font, BOCCHI_BLUE, WIDTH//2, HEIGHT//2 + 30, center=True)
     # Waits for R (restart) or ESC (exit)
-    screen_text("Press R or ESC", font, BLACK, WIDTH//2, HEIGHT//2 + 70, center=True)
+    screen_text("Press R or ESC", font, DARK_GREEN, WIDTH//2, HEIGHT//2 + 70, center=True)
+    screen_text("Inspired by Bocchi The Rock", font, BOCCHI_PINK, WIDTH//2, HEIGHT//2 + 100, center=True)
     pygame.display.update()
 
     while True:
