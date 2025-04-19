@@ -107,6 +107,7 @@ def show_menu(): # start menu // waits for the player to press "ENTER"
         screen_text("---->", big_font, BOCCHI_YELLOW, WIDTH//2, HEIGHT//2 + 120, center=True)
         screen_text("<----", big_font, BOCCHI_BLUE, WIDTH//2, HEIGHT//2 + 160, center=True)
         pygame.display.update()
+        game_oversound.()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -116,6 +117,7 @@ def show_menu(): # start menu // waits for the player to press "ENTER"
 
 def game_over_screen(score, personal_best): # game over when hits collision of yourself
     gameover_sound.play()
+    eat_sound.stop()
     pygame.mixer.music.stop()
     screen.fill(BG_COLOUR_2)
     screen_text("Game Over!(-_-)", big_font, RED, WIDTH//2, HEIGHT//3, center=True)
