@@ -1,6 +1,6 @@
 # Snake game (My own version)
 # Inspired by Bro Code
-# I used pygame because for me it's better than tkinter cuz I also imported mp3s
+# I used pygame because for me it's better than Tkinter cuz I also imported mp3s
 import pygame
 import random
 import os
@@ -9,30 +9,30 @@ pygame.init()
 
 # Display window
 TILE_SIZE = 60  # Larger size
-COLS, ROWS = 10, 10
+COLS, ROWS = 10, 10 
 WIDTH, HEIGHT = TILE_SIZE * COLS, TILE_SIZE * ROWS
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Bocchi's Snake Game") # title window
 
 # Colours
-BG_COLOUR_1 = ("#63955B")
-BG_COLOUR_2 = ("#99C06D")
-RED = ("#8B0000") # not to get confused with the skin
-BLACK = ("#000000")
-DARK_GREEN = ("#006400")
-BOCCHI_PINK = ("#e8a7a1")
-BOCCHI_YELLOW = ("#ffff3d")
-BOCCHI_BLUE = ("#7db0a7")
-MY_PFP_COLOUR = ("#7E93AE")
+BG_COLOUR_1 = "#63955B"
+BG_COLOUR_2 = "#99C06D"
+RED = "#8B0000" # not to get confused with the skin
+BLACK = "#000000"
+DARK_GREEN = "#006400"
+BOCCHI_PINK = "#e8a7a1"
+BOCCHI_YELLOW = "#ffff3d"
+BOCCHI_BLUE = "#7db0a7"
+MY_PFP_COLOUR = "#7E93AE"
 
 # randomize whenever you play
 # very customizable change if you want
 # Bocchi The Rock color palette
 snake_skins = [
-    ("#ffff3d"), # Yellow
-    ("#e8a7a1"), # Pink
-    ("#ff3232"), # Red
-    ("#7db0a7"), # Blue
+    "#ffff3d", # Yellow
+    "#e8a7a1", # Pink
+    "#ff3232", # Red
+    "#7db0a7", # Blue
 ]
 
 # all sound effects // change however you want
@@ -46,13 +46,13 @@ snake_head_img = pygame.image.load("snake_head.jpg") # Ikuyo Kita head
 snake_head_img = pygame.transform.scale(snake_head_img, (TILE_SIZE, TILE_SIZE))
 
 # Fonts // change font however you want
-font = pygame.font.SysFont("Consolas", 25)
-big_font = pygame.font.SysFont("Consolas", 60)
+font = pygame.font.SysFont("Times New Roman", 25)
+big_font = pygame.font.SysFont("Times New Roman", 60)
 
 clock = pygame.time.Clock()
 
 # High Score // sets your personal highscore through a save json file
-high_score_file = "SnakeHighscore.json" # automatically creates it // my personal best Score: 20
+high_score_file = "SnakeHighscore.json" # automatically creates it // my personal best Score: 24
 if not os.path.exists(high_score_file):
     with open(high_score_file, "w") as f:
         f.write("0")
@@ -107,7 +107,7 @@ def show_menu(): # start menu // waits for the player to press "ENTER"
         screen_text("---->", big_font, BOCCHI_YELLOW, WIDTH//2, HEIGHT//2 + 120, center=True)
         screen_text("<----", big_font, BOCCHI_BLUE, WIDTH//2, HEIGHT//2 + 160, center=True)
         pygame.display.update()
-        game_oversound.()
+        gameover_sound.stop()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
