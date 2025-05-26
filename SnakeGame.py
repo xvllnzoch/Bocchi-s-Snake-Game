@@ -1,6 +1,6 @@
 # Snake game (My own version)
 # Inspired by Bro Code
-# I used pygame because for me it's better than Tkinter cuz I also imported mp3s
+# I used pygame because for me it's better than tkinter cuz I also imported mp3s
 import pygame
 import random
 import os
@@ -36,13 +36,13 @@ snake_skins = [
 ]
 
 # all sound effects // change however you want
-pygame.mixer.music.load("audio.mp3")
+pygame.mixer.music.load("PyGame\\SnakeGame\\audio.mp3")
 pygame.mixer.music.set_volume(0.1)
-eat_sound = pygame.mixer.Sound("Voicy_Rock You.mp3")
-gameover_sound = pygame.mixer.Sound("Voicy_Attempting To Show Obedience.mp3")
+eat_sound = pygame.mixer.Sound("PyGame\\SnakeGame\\Voicy_Rock You.mp3")
+gameover_sound = pygame.mixer.Sound("PyGame\\SnakeGame\\Voicy_Attempting To Show Obedience.mp3")
 
 # Snake image // change however you want
-snake_head_img = pygame.image.load("snake_head.jpg") # Ikuyo Kita head
+snake_head_img = pygame.image.load("PyGame\\SnakeGame\\snake_head.jpg") # Ikuyo Kita head
 snake_head_img = pygame.transform.scale(snake_head_img, (TILE_SIZE, TILE_SIZE))
 
 # Fonts // change font however you want
@@ -52,7 +52,7 @@ big_font = pygame.font.SysFont("Times New Roman", 60)
 clock = pygame.time.Clock()
 
 # High Score // sets your personal highscore through a save json file
-high_score_file = "SnakeHighscore.json" # automatically creates it // my personal best Score: 24
+high_score_file = "Document\\Folder\\SnakeHighscore.json" # automatically creates it // my personal best Score: 24
 if not os.path.exists(high_score_file):
     with open(high_score_file, "w") as f:
         f.write("0")
@@ -155,7 +155,7 @@ def main(): # Main game loop: handles gameplay, movement, collisions, scoring, d
 
         running = True
         while running:
-            clock.tick(10) # the FPS
+            clock.tick(15) # the FPS
             checkered_background()
 
             for event in pygame.event.get():
