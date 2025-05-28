@@ -1,214 +1,217 @@
 # Snake game (My own version)
 # Inspired by Bro Code
 # I used pygame because for me it's better than tkinter cuz I also imported mp3s
+
 import pygame
 import random
 import os
 
-pygame.init()
 
-# Display window
-TILE_SIZE = 60  # Larger size
-COLS, ROWS = 10, 10 
-WIDTH, HEIGHT = TILE_SIZE * COLS, TILE_SIZE * ROWS
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Bocchi's Snake Game") # title window
+class Config:
+    # Display window
+    TILE_SIZE = 60
+    COLS, ROWS = 10, 10
+    WIDTH, HEIGHT = TILE_SIZE * COLS, TILE_SIZE * ROWS
+    # Colours
+    BG_COLOUR_1 = "#63955B"
+    BG_COLOUR_2 = "#99C06D"
+    RED = "#8B0000" # not to get confused with the skin
+    BLACK = "#000000"
+    DARK_GREEN = "#006400"
+    BOCCHI_PINK = "#e8a7a1"
+    BOCCHI_YELLOW = "#ffff3d"
+    BOCCHI_BLUE = "#7db0a7"
+    MY_PFP_COLOUR = "#7E93AE"
+    
+    SNAKE_SKINS = ["#ffff3d", "#e8a7a1", "#ff3232", "#7db0a7"]
+    # randomize whenever you play
+    # very customizable change if you want
+    # Bocchi The Rock color palette
+    HIGH_SCORE_FILE = "PyGame/SnakeGame/SnakeHighscore.json"
+    # all sound effects // change however you want
+    AUDIO_PATHS = {
+        "music": "PyGame/SnakeGame/audio.mp3",
+        "eat": "PyGame/SnakeGame/Voicy_Rock You.mp3",
+        "gameover": "PyGame/SnakeGame/Voicy_Attempting To Show Obedience.mp3"
+    }
+    SNAKE_HEAD_IMG_PATH = "PyGame/SnakeGame/snake_head.jpg"
 
-# Colours
-BG_COLOUR_1 = "#63955B"
-BG_COLOUR_2 = "#99C06D"
-RED = "#8B0000" # not to get confused with the skin
-BLACK = "#000000"
-DARK_GREEN = "#006400"
-BOCCHI_PINK = "#e8a7a1"
-BOCCHI_YELLOW = "#ffff3d"
-BOCCHI_BLUE = "#7db0a7"
-MY_PFP_COLOUR = "#7E93AE"
 
-# randomize whenever you play
-# very customizable change if you want
-# Bocchi The Rock color palette
-snake_skins = [
-    "#ffff3d", # Yellow
-    "#e8a7a1", # Pink
-    "#ff3232", # Red
-    "#7db0a7", # Blue
-]
-
-# all sound effects // change however you want
-pygame.mixer.music.load("PyGame\\SnakeGame\\audio.mp3")
-pygame.mixer.music.set_volume(0.1)
-eat_sound = pygame.mixer.Sound("PyGame\\SnakeGame\\Voicy_Rock You.mp3")
-gameover_sound = pygame.mixer.Sound("PyGame\\SnakeGame\\Voicy_Attempting To Show Obedience.mp3")
-
-# Snake image // change however you want
-snake_head_img = pygame.image.load("PyGame\\SnakeGame\\snake_head.jpg") # Ikuyo Kita head
-snake_head_img = pygame.transform.scale(snake_head_img, (TILE_SIZE, TILE_SIZE))
-
-# Fonts // change font however you want
-font = pygame.font.SysFont("Times New Roman", 25)
-big_font = pygame.font.SysFont("Times New Roman", 60)
-
-clock = pygame.time.Clock()
+class AssetManager:
+    def __init__(self):
+        pygame.mixer.music.load(Config.AUDIO_PATHS["music"])
+        pygame.mixer.music.set_volume(0.1)
+        self.eat_sound = pygame.mixer.Sound(Config.AUDIO_PATHS["eat"])
+        self.gameover_sound = pygame.mixer.Sound(Config.AUDIO_PATHS["gameover"])
+        self.snake_head_img = pygame.transform.scale(
+            pygame.image.load(Config.SNAKE_HEAD_IMG_PATH),
+            (Config.TILE_SIZE, Config.TILE_SIZE)
+        )
+        # Fonts // change font however you want
+        self.font = pygame.font.SysFont("Times New Roman", 25)
+        self.big_font = pygame.font.SysFont("Times New Roman", 60)
 
 # High Score // sets your personal highscore through a save json file
-high_score_file = "Document\\Folder\\SnakeHighscore.json" # automatically creates it // my personal best Score: 24
-if not os.path.exists(high_score_file):
-    with open(high_score_file, "w") as f:
-        f.write("0")
-with open(high_score_file, "r") as f:
-    personal_best = int(f.read())
+class HighScoreManager:
+    def __init__(self):
+        if not os.path.exists(Config.HIGH_SCORE_FILE):
+            with open(Config.HIGH_SCORE_FILE, "w") as f:
+                f.write("0")
+        with open(Config.HIGH_SCORE_FILE, "r") as f:
+            self.best = int(f.read())
 
-def randomize_skin(): # randomize your skin whenever you play
-    return random.choice(snake_skins)
+    def update(self, score):
+        if score > self.best:
+            self.best = score
+            with open(Config.HIGH_SCORE_FILE, "w") as f:
+                f.write(str(score))
 
-def checkered_background(): # checkered background similar to google snake // I just copied the color in the game MiSide (there's a snake game also there)
-    for y in range(ROWS):
-        for x in range(COLS):
-            rect = (x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE)
-            color = BG_COLOUR_1 if (x+y)%2 == 0 else BG_COLOUR_2
-            pygame.draw.rect(screen, color, rect)
+# Main Class with multiple game loops
+class SnakeGame:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
+        pygame.display.set_caption("Bocchi's Snake Game")
+        self.clock = pygame.time.Clock()
+        self.assets = AssetManager()
+        self.high_score = HighScoreManager()
 
-def snake_body(snake, direction, color): # the snake itself
-    for i, block in enumerate(snake):
-        x, y = block
-        if i == 0:
-            # rotate the snake head based on the direction
-            head_rotated = pygame.transform.rotate(snake_head_img, { # helps the head to stay in the snake
-                "UP": 0, "DOWN": 180, "LEFT": 90, "RIGHT": -90
-            }[direction])
-            screen.blit(head_rotated, (x * TILE_SIZE, y * TILE_SIZE))
-        else:
-            pygame.draw.rect(screen, color, (x*TILE_SIZE, y*TILE_SIZE, TILE_SIZE, TILE_SIZE))
+    def random_skin(self):
+        return random.choice(Config.SNAKE_SKINS)
 
-# helps with clipping // if the snake goes out the screen it comes back at the opposite direction
-def wrapping(x, y):
-    return x % COLS, y % ROWS
+    def draw_checkered_bg(self):
+        for y in range(Config.ROWS):
+            for x in range(Config.COLS):
+                color = Config.BG_COLOUR_1 if (x + y) % 2 == 0 else Config.BG_COLOUR_2
+                rect = (x * Config.TILE_SIZE, y * Config.TILE_SIZE, Config.TILE_SIZE, Config.TILE_SIZE)
+                pygame.draw.rect(self.screen, color, rect)
 
-# text on the screen
-def screen_text(text, font, color, x, y, center=False):
-    surface = font.render(text, True, color)
-    if center:
-        rect = surface.get_rect(center=(x, y))
-        screen.blit(surface, rect)
-    else:
-        screen.blit(surface, (x, y))
+    def draw_snake(self, snake, direction, color):
+        for i, (x, y) in enumerate(snake):
+            if i == 0:
+                head_rotated = pygame.transform.rotate(self.assets.snake_head_img, {
+                    "UP": 0, "DOWN": 180, "LEFT": 90, "RIGHT": -90
+                }[direction])
+                self.screen.blit(head_rotated, (x * Config.TILE_SIZE, y * Config.TILE_SIZE))
+            else:
+                pygame.draw.rect(self.screen, color,
+                                 (x * Config.TILE_SIZE, y * Config.TILE_SIZE, Config.TILE_SIZE, Config.TILE_SIZE))
 
-def show_menu(): # start menu // waits for the player to press "ENTER"
-    # Waits for the player to press Enter
-    in_menu = True
-    while in_menu:
-        screen.fill(BOCCHI_PINK)
-        screen_text("SNAKE GAME", big_font, BLACK, WIDTH//2, HEIGHT//3, center=True)
-        screen_text("Press ENTER to Play", font, BLACK, WIDTH//2, HEIGHT//2, center=True)
-        screen_text("Inspired by Bro Code", font, DARK_GREEN, WIDTH//2, HEIGHT//2.5, center=True)
-        screen_text("WASD Controls", font, RED, WIDTH//2, HEIGHT//2 + 40, center=True)
-        screen_text("Made by _Bunccep", font, MY_PFP_COLOUR, WIDTH//2, HEIGHT//2 + 70, center=True)
-        screen_text("---->", big_font, BOCCHI_YELLOW, WIDTH//2, HEIGHT//2 + 120, center=True)
-        screen_text("<----", big_font, BOCCHI_BLUE, WIDTH//2, HEIGHT//2 + 160, center=True)
-        pygame.display.update()
-        gameover_sound.stop()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                in_menu = False
+    def draw_text(self, text, font, color, x, y, center=False):
+        surface = font.render(text, True, color)
+        rect = surface.get_rect(center=(x, y)) if center else surface.get_rect(topleft=(x, y))
+        self.screen.blit(surface, rect)
 
-def game_over_screen(score, personal_best): # game over when hits collision of yourself
-    gameover_sound.play()
-    eat_sound.stop()
-    pygame.mixer.music.stop()
-    screen.fill(BG_COLOUR_2)
-    screen_text("Game Over!(-_-)", big_font, RED, WIDTH//2, HEIGHT//3, center=True)
-    screen_text(f"Score: {score}", font, BOCCHI_YELLOW, WIDTH//2, HEIGHT//2, center=True)
-    screen_text(f"Best: {personal_best}", font, BOCCHI_BLUE, WIDTH//2, HEIGHT//2 + 30, center=True)
-    # Waits for R (restart) or ESC (exit)
-    screen_text("Press R or ESC", font, DARK_GREEN, WIDTH//2, HEIGHT//2 + 70, center=True)
-    screen_text("Inspired by Bocchi The Rock", font, BOCCHI_PINK, WIDTH//2, HEIGHT//2 + 100, center=True)
-    pygame.display.update()
+    def wrapping(self, x, y):
+        return x % Config.COLS, y % Config.ROWS
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:
-                    return True # Restart THE GAME
-                elif event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    exit()
-
-def main(): # Main game loop: handles gameplay, movement, collisions, scoring, drawing, etc.
-    global personal_best
-
-    while True:  # Waits at the menu
-        show_menu()
-        pygame.mixer.music.play(-1)
-        # Initialize snake, food, and variables
-        snake = [(10, 10)]
-        direction = "RIGHT"
-        food = (random.randint(0, COLS-1), random.randint(0, ROWS-1))
-        score = 0
-        skin_color = randomize_skin()
-
-        running = True
-        while running:
-            clock.tick(15) # the FPS
-            checkered_background()
+    def show_menu(self):
+        while True:
+            self.screen.fill(Config.BOCCHI_PINK)
+            self.draw_text("SNAKE GAME", self.assets.big_font, Config.BLACK, Config.WIDTH // 2, Config.HEIGHT // 3, True)
+            self.draw_text("Press ENTER to Play", self.assets.font, Config.BLACK, Config.WIDTH // 2, Config.HEIGHT // 2, True)
+            self.draw_text("Inspired by Bro Code", self.assets.font, Config.DARK_GREEN, Config.WIDTH // 2, Config.HEIGHT // 2.5, True)
+            self.draw_text("WASD Controls", self.assets.font, Config.RED, Config.WIDTH // 2, Config.HEIGHT // 2 + 40, True)
+            self.draw_text("Made by _Bunccep", self.assets.font, Config.MY_PFP_COLOUR, Config.WIDTH // 2, Config.HEIGHT // 2 + 70, True)
+            self.draw_text("---->", self.assets.big_font, Config.BOCCHI_YELLOW, Config.WIDTH // 2, Config.HEIGHT // 2 + 120, True)
+            self.draw_text("<----", self.assets.big_font, Config.BOCCHI_BLUE, Config.WIDTH // 2, Config.HEIGHT // 2 + 160, True)
+            pygame.display.update()
+            self.assets.gameover_sound.stop()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-            # Input handling (WASD)
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_w] and direction != "DOWN":
-                direction = "UP"
-            elif keys[pygame.K_s] and direction != "UP":
-                direction = "DOWN"
-            elif keys[pygame.K_a] and direction != "RIGHT":
-                direction = "LEFT"
-            elif keys[pygame.K_d] and direction != "LEFT":
-                direction = "RIGHT"
-            # Move snake
-            head_x, head_y = snake[0]
-            if direction == "UP":
-                head_y -= 1
-            elif direction == "DOWN":
-                head_y += 1
-            elif direction == "LEFT":
-                head_x -= 1
-            elif direction == "RIGHT":
-                head_x += 1
-            # Check collision with self
-            head_x, head_y = wrapping(head_x, head_y)
-            new_head = (head_x, head_y)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    return
 
-            if new_head in snake:
-                if score > personal_best:
-                    personal_best = score
-                    with open(high_score_file, "w") as f:
-                        f.write(str(score))
-                if game_over_screen(score, personal_best):
-                    break
+    def game_over(self, score):
+        self.assets.gameover_sound.play()
+        self.assets.eat_sound.stop()
+        pygame.mixer.music.stop()
+        self.screen.fill(Config.BG_COLOUR_2)
+        self.draw_text("Game Over!(-_-)", self.assets.big_font, Config.RED, Config.WIDTH // 2, Config.HEIGHT // 3, True)
+        self.draw_text(f"Score: {score}", self.assets.font, Config.BOCCHI_YELLOW, Config.WIDTH // 2, Config.HEIGHT // 2, True)
+        self.draw_text(f"Best: {self.high_score.best}", self.assets.font, Config.BOCCHI_BLUE, Config.WIDTH // 2, Config.HEIGHT // 2 + 30, True)
+        self.draw_text("Press R or ESC", self.assets.font, Config.DARK_GREEN, Config.WIDTH // 2, Config.HEIGHT // 2 + 70, True)
+        self.draw_text("Inspired by Bocchi The Rock", self.assets.font, Config.BOCCHI_PINK, Config.WIDTH // 2, Config.HEIGHT // 2 + 100, True)
+        pygame.display.update()
 
-            snake.insert(0, new_head)
-            # Check food eaten
-            if new_head == food:
-                eat_sound.play()
-                score += 1
-                food = (random.randint(0, COLS-1), random.randint(0, ROWS-1))
-            else:
-                snake.pop()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        return True
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        exit()
 
-            snake_body(snake, direction, skin_color)
-            pygame.draw.rect(screen, RED, (food[0]*TILE_SIZE, food[1]*TILE_SIZE, TILE_SIZE, TILE_SIZE))
+    def run(self):
+        while True:
+            self.show_menu()
+            pygame.mixer.music.play(-1)
+            snake = [(10, 10)]
+            direction = "RIGHT"
+            food = (random.randint(0, Config.COLS - 1), random.randint(0, Config.ROWS - 1))
+            score = 0
+            color = self.random_skin()
 
-            screen_text(f"Score: {score}", font, BLACK, 10, 10)
-            screen_text(f"Best: {personal_best}", font, BLACK, 10, 40)
+            while True:
+                self.clock.tick(15)
+                self.draw_checkered_bg()
 
-            pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
 
-main()
+                keys = pygame.key.get_pressed()
+                if keys[pygame.K_w] and direction != "DOWN":
+                    direction = "UP"
+                elif keys[pygame.K_s] and direction != "UP":
+                    direction = "DOWN"
+                elif keys[pygame.K_a] and direction != "RIGHT":
+                    direction = "LEFT"
+                elif keys[pygame.K_d] and direction != "LEFT":
+                    direction = "RIGHT"
+
+                x, y = snake[0]
+                if direction == "UP":
+                    y -= 1
+                elif direction == "DOWN":
+                    y += 1
+                elif direction == "LEFT":
+                    x -= 1
+                elif direction == "RIGHT":
+                    x += 1
+
+                x, y = self.wrapping(x, y)
+                new_head = (x, y)
+
+                if new_head in snake:
+                    self.high_score.update(score)
+                    if self.game_over(score):
+                        break
+
+                snake.insert(0, new_head)
+                if new_head == food:
+                    self.assets.eat_sound.play()
+                    score += 1
+                    food = (random.randint(0, Config.COLS - 1), random.randint(0, Config.ROWS - 1))
+                else:
+                    snake.pop()
+
+                self.draw_snake(snake, direction, color)
+                pygame.draw.rect(self.screen, Config.RED,
+                                 (food[0] * Config.TILE_SIZE, food[1] * Config.TILE_SIZE, Config.TILE_SIZE, Config.TILE_SIZE))
+
+                self.draw_text(f"Score: {score}", self.assets.font, Config.BLACK, 10, 10)
+                self.draw_text(f"Best: {self.high_score.best}", self.assets.font, Config.BLACK, 10, 40)
+                pygame.display.update()
+
+
+if __name__ == "__main__":
+    SnakeGame().run()
